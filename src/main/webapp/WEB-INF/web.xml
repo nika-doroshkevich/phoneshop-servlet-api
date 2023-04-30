@@ -3,16 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
-  <display-name>Phoneshop servlet api training</display-name>
+    <display-name>Phoneshop servlet api training</display-name>
 
-  <servlet>
-    <servlet-name>productList</servlet-name>
-    <servlet-class>com.es.phoneshop.web.ProductListPageServlet</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>productList</servlet-name>
-    <url-pattern>/products</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>productList</servlet-name>
+        <servlet-class>com.es.phoneshop.web.ProductListPageServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>productList</servlet-name>
+        <url-pattern>/products</url-pattern>
+    </servlet-mapping>
 
 </web-app>
