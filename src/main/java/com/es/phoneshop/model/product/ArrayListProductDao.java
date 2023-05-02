@@ -55,23 +55,15 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public void save(Product product) {
+    public void save(Product product) throws NoSuchElementException {
         Lock writeLock = rwLock.writeLock();
         writeLock.lock();
 
         try {
             var productId = product.getId();
             if (productId != null) {
-                var foundOptionalProduct = products.stream()
-                        .filter(p -> productId.equals(p.getId()))
-                        .findAny();
-
-                if (foundOptionalProduct.isPresent()) {
-                    var foundProduct = foundOptionalProduct.get();
-                    ProductMapper.updateProduct(product, foundProduct);
-                } else {
-                    throw new NoSuchElementException("There is no product in the list with id: " + productId);
-                }
+                var foundProduct = getById(productId);
+                ProductMapper.updateProduct(product, foundProduct);
             } else {
                 product.setId(maxId++);
                 products.add(product);
