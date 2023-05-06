@@ -12,8 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-public class ArrayListProductDaoTest
-{
+public class ArrayListProductDaoTest {
     private ProductDao productDao;
 
     @Before
@@ -41,7 +40,7 @@ public class ArrayListProductDaoTest
 
     @Test
     public void testFindProductsThereIsResults() {
-        var products = productDao.findProducts();
+        var products = productDao.findProducts("");
         assertFalse(products.isEmpty());
         assertEquals(12, products.size());
     }
@@ -68,11 +67,11 @@ public class ArrayListProductDaoTest
 
     @Test
     public void testSaveProductIdNull() {
-        var sizeBefore = productDao.findProducts().size();
+        var sizeBefore = productDao.findProducts("").size();
         Currency usd = Currency.getInstance("USD");
         var product = new Product("test", "Test", new BigDecimal(100), usd, 100, "test");
         productDao.save(product);
-        var sizeAfter = productDao.findProducts().size();
+        var sizeAfter = productDao.findProducts("").size();
         assertEquals(sizeBefore + 1, sizeAfter);
     }
 
@@ -87,5 +86,26 @@ public class ArrayListProductDaoTest
     @Test(expected = NoSuchElementException.class)
     public void testDeleteThereIsNoIdInList() {
         productDao.delete(-1L);
+    }
+
+    @Test
+    public void testFindProductsQueryNullOrEmpty() {
+        var expectedSize = productDao.findProducts().size();
+        var productsQueryNull = productDao.findProducts(null);
+        assertEquals(expectedSize, productsQueryNull.size());
+        var productsQueryEmpty = productDao.findProducts("");
+        assertEquals(expectedSize, productsQueryEmpty.size());
+    }
+
+    @Test
+    public void testFindProductsQuerySuccessfully() {
+        var products = productDao.findProducts("samsung S");
+        assertEquals(8, products.size());
+    }
+
+    @Test
+    public void testFindProductsQueryNonMatch() {
+        var products = productDao.findProducts("b d");
+        assertEquals(0, products.size());
     }
 }

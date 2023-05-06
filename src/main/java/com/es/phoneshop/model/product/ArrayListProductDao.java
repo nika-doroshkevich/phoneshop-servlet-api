@@ -4,12 +4,14 @@ import com.es.phoneshop.exception.BadRequestException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ArrayListProductDao implements ProductDao {
@@ -42,13 +44,40 @@ public class ArrayListProductDao implements ProductDao {
 
     @Override
     public List<Product> findProducts() {
+        return products.stream()
+                .filter(Product::isAvailableForSale)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Product> findProducts(String query) {
         Lock readLock = rwLock.readLock();
         readLock.lock();
 
         try {
+            if (query == null || query.trim().isEmpty()) {
+                return products.stream()
+                        .filter(Product::isAvailableForSale)
+                        .collect(Collectors.toList());
+            }
+
+            String queryToLower = query.toLowerCase();
+            String[] queryWords = queryToLower.split("\\s+");
+
             return products.stream()
+                    .map(ProductDto::new)
+                    .peek(productDto -> countMatches(productDto, queryWords, queryToLower))
+                    .filter(productDto -> productDto.getNumberOfMatches() > 0)
+                    .sorted(Comparator.comparing(ProductDto::getNumberOfMatches).reversed())
+                    .map(ProductDto::getProduct)
                     .filter(Product::isAvailableForSale)
                     .collect(Collectors.toList());
+
+            //For second implementation
+//            return products.stream()
+//                    .filter(combineOr(queryWords))
+//                    .collect(Collectors.toList());
+
         } finally {
             readLock.unlock();
         }
@@ -103,6 +132,40 @@ public class ArrayListProductDao implements ProductDao {
                 .filter(p -> id.equals(p.getId()))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
+    }
+
+    private void countMatches(ProductDto productDto, String[] queryWords, String query) {
+        String description = productDto.getProduct().getDescription().toLowerCase();
+        int numberOfMatches = 0;
+        if (query.equals(description)) {
+            numberOfMatches = Integer.MAX_VALUE;
+        } else {
+            for (String s : queryWords) {
+                if (description.contains(s)) {
+                    numberOfMatches++;
+                }
+            }
+        }
+        productDto.setNumberOfMatches(numberOfMatches);
+    }
+
+    //Implementation using only streams (without creating additional classes), but sorting does not work
+    //filter and combineOr methods
+    private Predicate<Product> filter(String searchParameter) {
+        return p -> p.getDescription().contains(searchParameter);
+    }
+
+    private Predicate<Product> combineOr(String[] queryWords) {
+        var predicate = filter(queryWords[0]);
+
+        if (queryWords.length == 1) {
+            return predicate;
+        }
+
+        for (int i = 1; i < queryWords.length; i++) {
+            predicate = predicate.or(filter(queryWords[i]));
+        }
+        return predicate;
     }
 
     private void saveSampleProducts() {
