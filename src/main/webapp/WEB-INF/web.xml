@@ -32,9 +32,20 @@
         <url-pattern>/products/*</url-pattern>
     </servlet-mapping>
 
+    <!--Errors-->
+
+    <servlet>
+        <servlet-name>exceptionHandler</servlet-name>
+        <servlet-class>com.es.phoneshop.exception.ExceptionHandler</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>exceptionHandler</servlet-name>
+        <url-pattern>/exceptionHandler</url-pattern>
+    </servlet-mapping>
+
     <error-page>
-        <location>/WEB-INF/pages/error.jsp</location>
         <error-code>500</error-code>
+        <location>/exceptionHandler</location>
     </error-page>
 
 </web-app>

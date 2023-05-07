@@ -28,17 +28,17 @@ public class ArrayListProductDao implements ProductDao {
     private List<ProductPrice> priceHistory;
     private final ReadWriteLock rwLock;
 
+    private ArrayListProductDao() {
+        this.rwLock = new ReentrantReadWriteLock();
+        this.products = new ArrayList<>();
+        this.priceHistory = new ArrayList<>();
+    }
+
     public static synchronized ProductDao getInstance() {
         if (instance == null) {
             instance = new ArrayListProductDao();
         }
         return instance;
-    }
-
-    private ArrayListProductDao() {
-        this.rwLock = new ReentrantReadWriteLock();
-        this.products = new ArrayList<>();
-        this.priceHistory = new ArrayList<>();
     }
 
     @Override
@@ -172,7 +172,7 @@ public class ArrayListProductDao implements ProductDao {
         return products.stream()
                 .filter(p -> id.equals(p.getId()))
                 .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
+                .orElseThrow(() -> new NoSuchElementException("Product with id " + id + " not found." ));
     }
 
     private void countMatches(ProductDto productDto, String[] queryWords, String query) {
