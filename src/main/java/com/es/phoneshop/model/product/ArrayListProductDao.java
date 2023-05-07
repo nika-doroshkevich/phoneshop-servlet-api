@@ -1,7 +1,10 @@
 package com.es.phoneshop.model.product;
 
 import com.es.phoneshop.exception.BadRequestException;
+import com.es.phoneshop.model.product.price.ProductPrice;
+import com.es.phoneshop.model.product.price.ProductPricesDto;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,6 +25,7 @@ public class ArrayListProductDao implements ProductDao {
 
     private long maxId;
     private List<Product> products;
+    private List<ProductPrice> priceHistory;
     private final ReadWriteLock rwLock;
 
     public static synchronized ProductDao getInstance() {
@@ -34,6 +38,7 @@ public class ArrayListProductDao implements ProductDao {
     private ArrayListProductDao() {
         this.rwLock = new ReentrantReadWriteLock();
         this.products = new ArrayList<>();
+        this.priceHistory = new ArrayList<>();
     }
 
     @Override
@@ -50,6 +55,20 @@ public class ArrayListProductDao implements ProductDao {
         } finally {
             readLock.unlock();
         }
+    }
+
+    @Override
+    public ProductPricesDto getProductPrices(Long id) {
+        var productName = getById(id).getDescription();
+        var prices = priceHistory.stream()
+                .filter(productPrice -> id.equals(productPrice.getProductId()))
+                .sorted(Comparator.comparing(ProductPrice::getDate).reversed())
+                .collect(Collectors.toList());
+
+        return ProductPricesDto.builder()
+                .productName(productName)
+                .prices(prices)
+                .build();
     }
 
     @Override
@@ -111,10 +130,17 @@ public class ArrayListProductDao implements ProductDao {
             } else {
                 product.setId(maxId++);
                 products.add(product);
+                var productPrice = new ProductPrice(maxId, product.getPrice(), LocalDate.now(), product.getCurrency());
+                addProductPrice(productPrice);
             }
         } finally {
             writeLock.unlock();
         }
+    }
+
+    @Override
+    public void addProductPrice(ProductPrice productPrice) {
+        this.priceHistory.add(productPrice);
     }
 
     @Override
