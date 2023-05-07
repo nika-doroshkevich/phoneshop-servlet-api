@@ -5,6 +5,15 @@
          version="3.1">
     <display-name>Phoneshop servlet api training</display-name>
 
+    <context-param>
+        <param-name>insertDemoData</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>com.es.phoneshop.web.DemoDataServletContextListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>productList</servlet-name>
         <servlet-class>com.es.phoneshop.web.ProductListPageServlet</servlet-class>
