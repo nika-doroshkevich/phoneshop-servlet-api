@@ -7,7 +7,7 @@ public interface ProductDao {
 
     List<Product> findProducts();
 
-    List<Product> findProducts(String query);
+    List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder);
 
     void save(Product product);
 

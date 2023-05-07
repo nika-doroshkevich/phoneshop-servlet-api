@@ -16,8 +16,18 @@
         <thead>
         <tr>
             <td>Image</td>
-            <td>Description</td>
-            <td class="price">Price</td>
+            <td>
+                Description
+                <!--&#8593; - up-->
+                <!--&#8595; - down-->
+                <a href="?sort=description&order=asc&query=${param.query}">&#8593</a>
+                <a href="?sort=description&order=desc&query=${param.query}">&#8595</a>
+            </td>
+            <td class="price">
+                Price
+                <a href="?sort=price&order=asc&query=${param.query}">&#8593</a>
+                <a href="?sort=price&order=desc&query=${param.query}">&#8595</a>
+            </td>
         </tr>
         </thead>
         <c:forEach var="product" items="${products}">

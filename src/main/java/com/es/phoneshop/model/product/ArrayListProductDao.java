@@ -14,6 +14,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.es.phoneshop.model.product.SortField.description;
+import static com.es.phoneshop.model.product.SortField.price;
+import static com.es.phoneshop.model.product.SortOrder.desc;
+
 public class ArrayListProductDao implements ProductDao {
 
     private long maxId;
@@ -50,14 +54,18 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public List<Product> findProducts(String query) {
+    public List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
         Lock readLock = rwLock.readLock();
         readLock.lock();
 
         try {
+            var comparedByField = compareByField(sortField);
+            var comparedByFieldAndOrder = compareByOrder(comparedByField, sortOrder);
+
             if (query == null || query.trim().isEmpty()) {
                 return products.stream()
                         .filter(Product::isAvailableForSale)
+                        .sorted(comparedByFieldAndOrder)
                         .collect(Collectors.toList());
             }
 
@@ -70,6 +78,7 @@ public class ArrayListProductDao implements ProductDao {
                     .filter(productDto -> productDto.getNumberOfMatches() > 0)
                     .sorted(Comparator.comparing(ProductDto::getNumberOfMatches).reversed())
                     .map(ProductDto::getProduct)
+                    .sorted(comparedByFieldAndOrder)
                     .filter(Product::isAvailableForSale)
                     .collect(Collectors.toList());
 
@@ -147,6 +156,26 @@ public class ArrayListProductDao implements ProductDao {
             }
         }
         productDto.setNumberOfMatches(numberOfMatches);
+    }
+
+    private Comparator<Product> compareByField(SortField sortField) {
+        Comparator<Product> comparator;
+        if (sortField == description) {
+            comparator = Comparator.comparing(Product::getDescription);
+        } else if (sortField == price) {
+            comparator = Comparator.comparing(Product::getPrice);
+        } else {
+            //Default sorting
+            comparator = Comparator.comparing(Product::getDescription);
+        }
+        return comparator;
+    }
+
+    private Comparator<Product> compareByOrder(Comparator<Product> comparator, SortOrder sortOrder) {
+        if (sortOrder == desc) {
+            return comparator.reversed();
+        }
+        return comparator;
     }
 
     //Implementation using only streams (without creating additional classes), but sorting does not work
