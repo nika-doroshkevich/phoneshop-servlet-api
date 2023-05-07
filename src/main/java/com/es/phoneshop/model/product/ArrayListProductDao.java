@@ -59,14 +59,14 @@ public class ArrayListProductDao implements ProductDao {
 
     @Override
     public ProductPricesDto getProductPrices(Long id) {
-        var productName = getById(id).getDescription();
+        var productDescription = getById(id).getDescription();
         var prices = priceHistory.stream()
                 .filter(productPrice -> id.equals(productPrice.getProductId()))
                 .sorted(Comparator.comparing(ProductPrice::getDate).reversed())
                 .collect(Collectors.toList());
 
         return ProductPricesDto.builder()
-                .productName(productName)
+                .productDescription(productDescription)
                 .prices(prices)
                 .build();
     }
@@ -172,7 +172,7 @@ public class ArrayListProductDao implements ProductDao {
         return products.stream()
                 .filter(p -> id.equals(p.getId()))
                 .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Product with id " + id + " not found." ));
+                .orElseThrow(() -> new NoSuchElementException("Product with id " + id + " not found."));
     }
 
     private void countMatches(ProductDto productDto, String[] queryWords, String query) {

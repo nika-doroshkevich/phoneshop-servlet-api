@@ -9,7 +9,7 @@
         <span>Price history</span>
     </p>
     <p>
-            ${productPricesDto.productName}
+            ${productPricesDto.productDescription}
     </p>
     <table>
         <thead>

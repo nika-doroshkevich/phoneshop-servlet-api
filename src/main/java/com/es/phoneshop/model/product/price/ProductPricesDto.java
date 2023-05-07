@@ -15,6 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductPricesDto {
 
-    private String productName;
+    private String productDescription;
     private List<ProductPrice> prices;
 }
