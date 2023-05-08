@@ -142,7 +142,7 @@ public class ArrayListProductDaoTest {
         ProductPrice productPrice = prices.get(0);
         Long productId = 1L;
         assertEquals(productId, productPrice.getProductId());
-        BigDecimal price = new BigDecimal(100);
+        BigDecimal price = new BigDecimal(200);
         assertEquals(price, productPrice.getPrice());
         assertEquals(LocalDate.now(), productPrice.getDate());
         var currency = Currency.getInstance("USD");

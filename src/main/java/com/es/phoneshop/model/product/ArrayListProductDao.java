@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import static com.es.phoneshop.model.product.SortField.description;
 import static com.es.phoneshop.model.product.SortField.price;
 import static com.es.phoneshop.model.product.SortOrder.desc;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ArrayListProductDao implements ProductDao {
 
@@ -87,7 +88,7 @@ public class ArrayListProductDao implements ProductDao {
             var comparedByField = compareByField(sortField);
             var comparedByFieldAndOrder = compareByOrder(comparedByField, sortOrder);
 
-            if (query == null || query.trim().isEmpty()) {
+            if (isBlank(query)) {
                 return products.stream()
                         .filter(Product::isAvailableForSale)
                         .sorted(comparedByFieldAndOrder)
@@ -130,7 +131,7 @@ public class ArrayListProductDao implements ProductDao {
             } else {
                 product.setId(maxId++);
                 products.add(product);
-                var productPrice = new ProductPrice(maxId, product.getPrice(), LocalDate.now(), product.getCurrency());
+                var productPrice = new ProductPrice(maxId - 1, product.getPrice(), LocalDate.now(), product.getCurrency());
                 addProductPrice(productPrice);
             }
         } finally {

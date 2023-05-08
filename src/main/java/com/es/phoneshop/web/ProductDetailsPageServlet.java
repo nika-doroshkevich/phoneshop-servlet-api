@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class ProductDetailsPageServlet extends HttpServlet {
 
     private static final String PRICES = "prices";
@@ -61,7 +63,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
     private void validatePath(String path) {
         boolean wrongPath = false;
 
-        if (path == null || path.trim().isEmpty()) {
+        if (isBlank(path)) {
             wrongPath = true;
         }
 
