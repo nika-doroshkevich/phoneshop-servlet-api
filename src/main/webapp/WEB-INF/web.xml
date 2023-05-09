@@ -5,14 +5,47 @@
          version="3.1">
     <display-name>Phoneshop servlet api training</display-name>
 
+    <context-param>
+        <param-name>insertDemoData</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>com.es.phoneshop.web.DemoDataServletContextListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>productList</servlet-name>
         <servlet-class>com.es.phoneshop.web.ProductListPageServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>productList</servlet-name>
         <url-pattern>/products</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>product</servlet-name>
+        <servlet-class>com.es.phoneshop.web.ProductDetailsPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>product</servlet-name>
+        <url-pattern>/products/*</url-pattern>
+    </servlet-mapping>
+
+    <!--Errors-->
+
+    <servlet>
+        <servlet-name>exceptionHandler</servlet-name>
+        <servlet-class>com.es.phoneshop.exception.ExceptionHandler</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>exceptionHandler</servlet-name>
+        <url-pattern>/exceptionHandler</url-pattern>
+    </servlet-mapping>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/exceptionHandler</location>
+    </error-page>
 
 </web-app>
