@@ -12,7 +12,6 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.es.phoneshop.model.product.SortField.description;
@@ -98,6 +97,17 @@ public class ArrayListProductDao implements ProductDao {
             String queryToLower = query.toLowerCase();
             String[] queryWords = queryToLower.split("\\s+");
 
+            if (sortField == null || sortOrder == null) {
+                return products.stream()
+                        .map(ProductDto::new)
+                        .peek(productDto -> countMatches(productDto, queryWords, queryToLower))
+                        .filter(productDto -> productDto.getNumberOfMatches() > 0)
+                        .sorted(Comparator.comparing(ProductDto::getNumberOfMatches).reversed())
+                        .map(ProductDto::getProduct)
+                        .filter(Product::isAvailableForSale)
+                        .collect(Collectors.toList());
+            }
+
             return products.stream()
                     .map(ProductDto::new)
                     .peek(productDto -> countMatches(productDto, queryWords, queryToLower))
@@ -107,12 +117,6 @@ public class ArrayListProductDao implements ProductDao {
                     .sorted(comparedByFieldAndOrder)
                     .filter(Product::isAvailableForSale)
                     .collect(Collectors.toList());
-
-            //For second implementation
-//            return products.stream()
-//                    .filter(combineOr(queryWords))
-//                    .collect(Collectors.toList());
-
         } finally {
             readLock.unlock();
         }
@@ -209,24 +213,5 @@ public class ArrayListProductDao implements ProductDao {
             return comparator.reversed();
         }
         return comparator;
-    }
-
-    //Implementation using only streams (without creating additional classes), but sorting does not work
-    //filter and combineOr methods
-    private Predicate<Product> filter(String searchParameter) {
-        return p -> p.getDescription().contains(searchParameter);
-    }
-
-    private Predicate<Product> combineOr(String[] queryWords) {
-        var predicate = filter(queryWords[0]);
-
-        if (queryWords.length == 1) {
-            return predicate;
-        }
-
-        for (int i = 1; i < queryWords.length; i++) {
-            predicate = predicate.or(filter(queryWords[i]));
-        }
-        return predicate;
     }
 }
