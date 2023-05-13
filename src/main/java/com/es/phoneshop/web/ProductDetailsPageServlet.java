@@ -51,7 +51,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             var product = productDao.getProduct(productId);
             attributes.put("product", product);
             requestPage = "product.jsp";
-            request.setAttribute("cart", cartService.getCart());
+            request.setAttribute("cart", cartService.getCart(request));
         }
         dispatchRequest(request, response, requestPage, attributes);
     }
@@ -89,12 +89,13 @@ public class ProductDetailsPageServlet extends HttpServlet {
         var locale = request.getLocale();
         var quantityString = request.getParameter("quantity");
         int quantity;
+        var cart = cartService.getCart(request);
         String errorMessage = null;
 
         try {
             var format = NumberFormat.getInstance(locale);
             quantity = format.parse(quantityString).intValue();
-            cartService.add(productId, quantity);
+            cartService.add(cart, productId, quantity);
         } catch (ParseException ex) {
             errorMessage = "Quantity of products should be a number";
         } catch (OutOfStockException e) {
