@@ -12,4 +12,9 @@ public class CartItem {
 
     private Product product;
     private int quantity;
+
+    @Override
+    public String toString() {
+        return product.getCode() + ", " + quantity;
+    }
 }

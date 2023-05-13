@@ -15,4 +15,11 @@ public class Cart {
     public Cart() {
         this.items = new ArrayList<>();
     }
+
+    @Override
+    public String toString() {
+        return "Cart{" +
+                "items=" + items +
+                '}';
+    }
 }
