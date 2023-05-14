@@ -2,6 +2,7 @@ package com.es.phoneshop.web;
 
 import com.es.phoneshop.exception.BadRequestException;
 import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.ArrayListProductDao;
@@ -40,6 +41,12 @@ public class ProductDetailsPageServlet extends HttpServlet {
         validatePath(path);
         var productId = retrieveProductId(path);
 
+        String error = (String) request.getAttribute("error");
+        String message = request.getParameter("message");
+        if (message != null && (error == null || error.isEmpty())) {
+            request.setAttribute("message", message);
+        }
+
         String requestPage;
         Map<String, Object> attributes = new HashMap<>();
 
@@ -51,7 +58,9 @@ public class ProductDetailsPageServlet extends HttpServlet {
             var product = productDao.getProduct(productId);
             attributes.put("product", product);
             requestPage = "product.jsp";
-            request.setAttribute("cart", cartService.getCart(request));
+            Cart cartFromSession = cartService.getCart(request);
+            request.setAttribute("cart", cartFromSession);
+            productDao.addProductToRecentlyViewed(request, product);
         }
         dispatchRequest(request, response, requestPage, attributes);
     }

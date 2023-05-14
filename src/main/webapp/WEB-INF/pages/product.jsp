@@ -5,13 +5,15 @@
 
 <jsp:useBean id="product" type="com.es.phoneshop.model.product.Product" scope="request"/>
 <tags:master pageTitle="Product Details">
+    <a href="${pageContext.servletContext.contextPath}/products">Back to main page</a>
+
     <p>
         Cart: ${cart}
     </p>
 
-    <c:if test="${not empty param.message}">
+    <c:if test="${not empty message}">
         <div class="success">
-                ${param.message}
+                ${message}
         </div>
     </c:if>
     <c:if test="${not empty error}">
@@ -53,7 +55,8 @@
             <tr>
                 <td>Quantity</td>
                 <td>
-                    <input name="quantity" value="${not empty error ? param.quantity : 1}" class="quantity">
+                    <input name="quantity" value="${not empty error ? param.quantity : 1}"
+                           class="quantity" style="width: 100%;">
                     <c:if test="${not empty error}">
                         <div class="error">
                                 ${error}

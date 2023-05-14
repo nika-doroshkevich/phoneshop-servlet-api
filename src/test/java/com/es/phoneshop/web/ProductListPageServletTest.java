@@ -1,16 +1,16 @@
 package com.es.phoneshop.web;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
@@ -30,6 +30,8 @@ public class ProductListPageServletTest {
     private RequestDispatcher requestDispatcher;
     @Mock
     private ServletConfig config;
+    @Mock
+    private HttpSession httpSession;
 
     private ProductListPageServlet servlet = new ProductListPageServlet();
 
@@ -41,6 +43,7 @@ public class ProductListPageServletTest {
 
     @Test
     public void testDoGet() throws ServletException, IOException {
+        when(request.getSession()).thenReturn(httpSession);
         servlet.doGet(request, response);
         verify(requestDispatcher).forward(request, response);
         verify(request).setAttribute(eq("products"), any());

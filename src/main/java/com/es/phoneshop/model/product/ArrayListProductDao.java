@@ -3,12 +3,15 @@ package com.es.phoneshop.model.product;
 import com.es.phoneshop.exception.BadRequestException;
 import com.es.phoneshop.model.product.price.ProductPrice;
 import com.es.phoneshop.model.product.price.ProductPricesDto;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -20,6 +23,8 @@ import static com.es.phoneshop.model.product.SortOrder.desc;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ArrayListProductDao implements ProductDao {
+
+    private static final String RECENTLY_VIEWED_PRODUCTS_SESSION_ATTRIBUTE = ArrayListProductDao.class.getName() + ".recentlyViewedProducts";
 
     private static ProductDao instance;
 
@@ -170,6 +175,38 @@ public class ArrayListProductDao implements ProductDao {
             return products;
         } finally {
             readLock.unlock();
+        }
+    }
+
+    @Override
+    public void addProductToRecentlyViewed(HttpServletRequest httpServletRequest, Product product) {
+        var currentSession = httpServletRequest.getSession();
+        LinkedList<Product> productsFromSession = (LinkedList<Product>) currentSession.getAttribute(RECENTLY_VIEWED_PRODUCTS_SESSION_ATTRIBUTE);
+        LinkedList<Product> products;
+        if (productsFromSession == null) {
+            products = new LinkedList<>();
+            products.addFirst(product);
+        } else {
+            products = productsFromSession;
+            var firstProduct = products.getFirst();
+            if (!Objects.equals(firstProduct.getId(), product.getId())) {
+                products.addFirst(product);
+            }
+            if (products.size() > 3) {
+                products.removeLast();
+            }
+        }
+        currentSession.setAttribute(RECENTLY_VIEWED_PRODUCTS_SESSION_ATTRIBUTE, products);
+    }
+
+    @Override
+    public LinkedList<Product> getRecentlyViewedProducts(HttpServletRequest httpServletRequest) {
+        var currentSession = httpServletRequest.getSession();
+        LinkedList<Product> productsFromSession = (LinkedList<Product>) currentSession.getAttribute(RECENTLY_VIEWED_PRODUCTS_SESSION_ATTRIBUTE);
+        if (productsFromSession == null) {
+            return new LinkedList<>();
+        } else {
+            return productsFromSession;
         }
     }
 
