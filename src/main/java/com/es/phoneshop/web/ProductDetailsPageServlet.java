@@ -7,6 +7,7 @@ import com.es.phoneshop.model.cart.CartService;
 import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.model.product.RecentlyViewedProductsService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -60,7 +61,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             requestPage = "product.jsp";
             Cart cartFromSession = cartService.getCart(request);
             request.setAttribute("cart", cartFromSession);
-            productDao.addProductToRecentlyViewed(request, product);
+            new RecentlyViewedProductsService().addProductToRecentlyViewed(request, product);
         }
         dispatchRequest(request, response, requestPage, attributes);
     }

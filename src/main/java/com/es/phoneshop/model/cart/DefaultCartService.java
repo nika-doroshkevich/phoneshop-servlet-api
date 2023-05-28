@@ -39,17 +39,19 @@ public class DefaultCartService implements CartService {
             throw new OutOfStockException(product, quantity, product.getStock());
         }
 
-        boolean itemNotExists = true;
+        var itemOptional = cart.getItems().stream()
+                .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
+                .findAny();
 
-        for (CartItem cartItem : cart.getItems()) {
-            if (productId.equals(cartItem.getProduct().getId())) {
-                int previousQuantity = cartItem.getQuantity();
-                cartItem.setQuantity(previousQuantity + quantity);
-                itemNotExists = false;
-                return;
+        if (itemOptional.isPresent()) {
+            var item = itemOptional.get();
+            int previousQuantity = item.getQuantity();
+            var newQuantity = previousQuantity + quantity;
+            if (product.getStock() < newQuantity) {
+                throw new OutOfStockException(product, quantity, product.getStock());
             }
-        }
-        if (itemNotExists) {
+            item.setQuantity(previousQuantity + quantity);
+        } else {
             cart.getItems().add(new CartItem(product, quantity));
         }
     }

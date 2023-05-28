@@ -3,6 +3,7 @@ package com.es.phoneshop.web;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.model.product.RecentlyViewedProductsService;
 import com.es.phoneshop.model.product.SortField;
 import com.es.phoneshop.model.product.SortOrder;
 import jakarta.servlet.ServletConfig;
@@ -39,7 +40,7 @@ public class ProductListPageServlet extends HttpServlet {
 
         request.setAttribute("products", products);
 
-        var list = productDao.getRecentlyViewedProducts(request);
+        var list = new RecentlyViewedProductsService().getRecentlyViewedProducts(request);
         List<Product> recentlyViewedProducts = new ArrayList<>(list);
         request.setAttribute("recentlyViewedProducts", recentlyViewedProducts);
         request.getRequestDispatcher("/WEB-INF/pages/productList.jsp").forward(request, response);
