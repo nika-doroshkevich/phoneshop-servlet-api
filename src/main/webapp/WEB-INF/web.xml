@@ -41,6 +41,15 @@
         <url-pattern>/cart</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>deleteCartItem</servlet-name>
+        <servlet-class>com.es.phoneshop.web.DeleteCartItemServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>deleteCartItem</servlet-name>
+        <url-pattern>/cart/deleteCartItem/*</url-pattern>
+    </servlet-mapping>
+
     <!--Errors-->
 
     <servlet>
