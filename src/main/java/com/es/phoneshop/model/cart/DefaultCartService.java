@@ -55,4 +55,28 @@ public class DefaultCartService implements CartService {
             cart.getItems().add(new CartItem(product, quantity));
         }
     }
+
+    @Override
+    public synchronized void update(Cart cart, Long productId, int quantity) throws OutOfStockException {
+        Product product = productDao.getProduct(productId);
+        if (product.getStock() < quantity) {
+            throw new OutOfStockException(product, quantity, product.getStock());
+        }
+
+        var itemOptional = cart.getItems().stream()
+                .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
+                .findAny();
+
+        if (itemOptional.isPresent()) {
+            var item = itemOptional.get();
+            int previousQuantity = item.getQuantity();
+            var newQuantity = previousQuantity + quantity;
+            if (product.getStock() < newQuantity) {
+                throw new OutOfStockException(product, quantity, product.getStock());
+            }
+            item.setQuantity(quantity);
+        } else {
+            cart.getItems().add(new CartItem(product, quantity));
+        }
+    }
 }
