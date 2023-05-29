@@ -5,6 +5,8 @@
 
 <jsp:useBean id="products" type="java.util.ArrayList" scope="request"/>
 <tags:master pageTitle="Product List">
+    <a href="${pageContext.servletContext.contextPath}/cart">Cart</a>
+
     <p>
         Welcome to Expert-Soft training!
     </p>

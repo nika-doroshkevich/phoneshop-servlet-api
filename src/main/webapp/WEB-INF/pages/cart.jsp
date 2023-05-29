@@ -5,8 +5,10 @@
 
 <jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
 <tags:master pageTitle="Cart">
+    <a href="${pageContext.servletContext.contextPath}/products">Back to main page</a>
+
     <p>
-        Cart: ${cart}
+        Cart: ${cart}, total quantity: ${cart.totalQuantity}
     </p>
 
     <c:if test="${not empty param.message}">
@@ -81,6 +83,15 @@
                     </td>
                 </tr>
             </c:forEach>
+            <tr>
+                <td></td>
+                <td></td>
+                <td class="price">Total cost</td>
+                <td class="price">
+                    <fmt:formatNumber value="${cart.totalCost}" type="currency"
+                                      currencySymbol="${item.product.currency.symbol}"/>
+                </td>
+            </tr>
         </table>
         <p>
             <button>Update</button>
