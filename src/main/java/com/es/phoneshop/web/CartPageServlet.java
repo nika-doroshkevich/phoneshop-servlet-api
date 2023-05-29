@@ -63,12 +63,8 @@ public class CartPageServlet extends HttpServlet {
     private void handleError(Map<Long, String> errors, Long productId, Exception e) {
         if (e.getClass().equals(ParseException.class)) {
             errors.put(productId, "Quantity of products should be a number");
-        } else {
-            if (((OutOfStockException) e).getStockRequested() <= 0) {
-                errors.put(productId, "Can't be negative or zero");
-            } else {
-                errors.put(productId, "Out of stock, available " + ((OutOfStockException) e).getStockAvailable());
-            }
+        } else if (e.getClass().equals(OutOfStockException.class)) {
+            errors.put(productId, "Out of stock, available " + ((OutOfStockException) e).getStockAvailable());
         }
     }
 

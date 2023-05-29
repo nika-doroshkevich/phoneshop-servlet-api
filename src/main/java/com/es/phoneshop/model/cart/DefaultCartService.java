@@ -7,6 +7,8 @@ import com.es.phoneshop.model.product.ProductDao;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
+import java.util.Currency;
+import java.util.NoSuchElementException;
 
 public class DefaultCartService implements CartService {
 
@@ -66,26 +68,17 @@ public class DefaultCartService implements CartService {
             throw new OutOfStockException(product, quantity, product.getStock());
         }
 
-        var itemOptional = cart.getItems().stream()
+        var item = cart.getItems().stream()
                 .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
-                .findAny();
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Item doesn't exist."));
 
-        if (itemOptional.isPresent()) {
-            var item = itemOptional.get();
-            int previousQuantity = item.getQuantity();
-            var newQuantity = previousQuantity + quantity;
-            if (product.getStock() < newQuantity) {
-                throw new OutOfStockException(product, quantity, product.getStock());
-            }
-            item.setQuantity(quantity);
-        } else {
-            cart.getItems().add(new CartItem(product, quantity));
-        }
+        item.setQuantity(quantity);
         recalculateCart(cart);
     }
 
     @Override
-    public void delete(Cart cart, Long productId) {
+    public synchronized void delete(Cart cart, Long productId) {
         cart.getItems().removeIf(item ->
                 productId.equals(item.getProduct().getId())
         );
@@ -99,12 +92,16 @@ public class DefaultCartService implements CartService {
                 .sum()
         );
 
-        BigDecimal totalCost = BigDecimal.ZERO;
-        for (CartItem cartItem : cart.getItems()) {
-            var price = cartItem.getProduct().getPrice();
-            var quantity = cartItem.getQuantity();
-            totalCost = totalCost.add(price.multiply(BigDecimal.valueOf(quantity)));
-        }
+        BigDecimal totalCostValue = cart.getItems().stream()
+                .map(item -> {
+                    var price = item.getProduct().getPrice();
+                    var quantity = item.getQuantity();
+                    return price.multiply(BigDecimal.valueOf(quantity));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        var usd = Currency.getInstance("USD");
+        var totalCost = cart.new TotalCost(totalCostValue, usd);
         cart.setTotalCost(totalCost);
     }
 }

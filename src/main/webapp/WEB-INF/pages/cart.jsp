@@ -60,7 +60,7 @@
 
                         <input name="quantity"
                                value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}"
-                               class="quantity"/>
+                               class="quantity" style="width: 100%;"/>
                         <c:if test="${not empty error}">
                             <div class="error">
                                     ${errors[item.product.id]}
@@ -88,8 +88,8 @@
                 <td></td>
                 <td class="price">Total cost</td>
                 <td class="price">
-                    <fmt:formatNumber value="${cart.totalCost}" type="currency"
-                                      currencySymbol="${item.product.currency.symbol}"/>
+                    <fmt:formatNumber value="${cart.totalCost.totalCost}" type="currency"
+                                      currencySymbol="${cart.totalCost.currency.symbol}"/>
                 </td>
             </tr>
         </table>
