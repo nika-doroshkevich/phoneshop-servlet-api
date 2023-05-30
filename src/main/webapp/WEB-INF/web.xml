@@ -77,6 +77,15 @@
         <url-pattern>/order/overview/*</url-pattern>
     </servlet-mapping>
 
+    <filter>
+        <filter-name>dosFilter</filter-name>
+        <filter-class>com.es.phoneshop.web.DosFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>dosFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!--Errors-->
 
     <servlet>

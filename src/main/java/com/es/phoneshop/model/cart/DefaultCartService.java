@@ -87,7 +87,7 @@ public class DefaultCartService implements CartService {
 
     @Override
     public void cleanCart(Cart cart) {
-        cart.getItems().removeAll(cart.getItems());
+        cart.getItems().clear();
         cart.setTotalQuantity(0);
         cart.setTotalCost(null);
         cart.setCurrency(null);
