@@ -92,7 +92,7 @@ public class DefaultCartService implements CartService {
                 .sum()
         );
 
-        BigDecimal totalCostValue = cart.getItems().stream()
+        BigDecimal totalCost = cart.getItems().stream()
                 .map(item -> {
                     var price = item.getProduct().getPrice();
                     var quantity = item.getQuantity();
@@ -100,8 +100,8 @@ public class DefaultCartService implements CartService {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        var usd = Currency.getInstance("USD");
-        var totalCost = cart.new TotalCost(totalCostValue, usd);
         cart.setTotalCost(totalCost);
+        var usd = Currency.getInstance("USD");
+        cart.setCurrency(usd);
     }
 }
