@@ -66,7 +66,6 @@
                 </tr>
             </c:forEach>
 
-
             <tr>
                 <td></td>
                 <td></td>
@@ -86,7 +85,6 @@
                                       currencySymbol="${order.currency.symbol}"/>
                 </td>
             </tr>
-
 
             <tr>
                 <td></td>

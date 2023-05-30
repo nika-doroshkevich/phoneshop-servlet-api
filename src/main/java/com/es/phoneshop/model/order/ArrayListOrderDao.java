@@ -46,6 +46,22 @@ public class ArrayListOrderDao implements OrderDao {
     }
 
     @Override
+    public Order getOrderBySecureId(String secureId) throws NoSuchElementException {
+        if (secureId == null) {
+            throw new BadRequestException("Order id can not be null.");
+        }
+
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+
+        try {
+            return getBySecureId(secureId);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
     public void save(Order order) throws NoSuchElementException {
         Lock writeLock = rwLock.writeLock();
         writeLock.lock();
@@ -70,5 +86,12 @@ public class ArrayListOrderDao implements OrderDao {
                 .filter(p -> id.equals(p.getId()))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Order with id " + id + " not found."));
+    }
+
+    private Order getBySecureId(String secureId) {
+        return orders.stream()
+                .filter(p -> secureId.equals(p.getSecureId()))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Order not found."));
     }
 }
