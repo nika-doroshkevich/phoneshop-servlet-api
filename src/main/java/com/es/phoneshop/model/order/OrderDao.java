@@ -1,9 +1,8 @@
 package com.es.phoneshop.model.order;
 
-public interface OrderDao {
-    Order getOrder(Long id);
+import com.es.phoneshop.model.BaseDao;
+
+public interface OrderDao extends BaseDao<Order> {
 
     Order getOrderBySecureId(String secureId);
-
-    void save(Order order);
 }

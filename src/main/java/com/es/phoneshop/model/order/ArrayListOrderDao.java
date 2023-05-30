@@ -30,7 +30,7 @@ public class ArrayListOrderDao implements OrderDao {
     }
 
     @Override
-    public Order getOrder(Long id) throws NoSuchElementException {
+    public Order getEntity(Long id) throws NoSuchElementException {
         if (id == null) {
             throw new BadRequestException("Order id can not be null.");
         }
@@ -69,7 +69,7 @@ public class ArrayListOrderDao implements OrderDao {
         try {
             var orderId = order.getId();
             if (orderId != null) {
-                orders.remove(getOrder(orderId));
+                orders.remove(getEntity(orderId));
                 orders.add(order);
 
             } else {

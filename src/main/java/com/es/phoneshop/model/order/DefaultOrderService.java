@@ -39,12 +39,9 @@ public class DefaultOrderService implements OrderService {
         order.setSubtotal(cart.getTotalCost());
         order.setDeliveryCost(calculateDeliveryCost());
         order.setTotalCost(order.getSubtotal().add(order.getDeliveryCost()));
+        order.setTotalQuantity(cart.getTotalQuantity());
 
         return order;
-    }
-
-    private BigDecimal calculateDeliveryCost() {
-        return new BigDecimal(5);
     }
 
     @Override
@@ -56,5 +53,9 @@ public class DefaultOrderService implements OrderService {
     public void placeOrder(Order order) {
         order.setSecureId(UUID.randomUUID().toString());
         orderDao.save(order);
+    }
+
+    private BigDecimal calculateDeliveryCost() {
+        return new BigDecimal(5);
     }
 }

@@ -56,7 +56,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             attributes.put("productPricesDto", prices);
             requestPage = "productPrices.jsp";
         } else {
-            var product = productDao.getProduct(productId);
+            var product = productDao.getEntity(productId);
             attributes.put("product", product);
             requestPage = "product.jsp";
             Cart cartFromSession = cartService.getCart(request);

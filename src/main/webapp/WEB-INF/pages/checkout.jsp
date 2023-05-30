@@ -108,8 +108,21 @@
             <tags:orderFormRow name="phone" label="Phone" order="${order}"
                                errors="${errors}"></tags:orderFormRow>
 
-            <tags:orderFormRow name="deliveryDate" label="Delivery date" order="${order}"
-                               errors="${errors}"></tags:orderFormRow>
+            <tr>
+                <td>Delivery date<span style="color:red">*</span></td>
+
+                <td>
+                    <fmt:formatNumber value="${deliveryDate}" var="deliveryDate"/>
+                    <c:set var="error" value="${errors['deliveryDate']}"/>
+                    <input type="date" name="deliveryDate"
+                           value="${not empty error ? param['deliveryDate'] : order['deliveryDate']}"/>
+                    <c:if test="${not empty error}">
+                        <div class="error">
+                                ${error}
+                        </div>
+                    </c:if>
+                </td>
+            </tr>
 
             <tags:orderFormRow name="deliveryAddress" label="Delivery address" order="${order}"
                                errors="${errors}"></tags:orderFormRow>
@@ -117,7 +130,6 @@
                 <td>Payment method:<span style="color:red">*</span></td>
                 <td>
                     <select name="paymentMethod">
-                        <option></option>
                         <c:forEach var="paymentMethod" items="${paymentMethods}">
                             <option>${paymentMethod}</option>
                         </c:forEach>

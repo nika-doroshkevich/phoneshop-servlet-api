@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -50,6 +51,7 @@ public class CheckoutPageServlet extends HttpServlet {
         setRequiredParameter(request, "lastName", errors, order::setLastName);
         setRequiredParameter(request, "phone", errors, order::setPhone);
         setRequiredParameter(request, "deliveryAddress", errors, order::setDeliveryAddress);
+        setDeliveryDate(request, errors, order);
         setPaymentMethod(request, errors, order);
 
         handleError(request, response, errors, order, cart);
@@ -85,6 +87,17 @@ public class CheckoutPageServlet extends HttpServlet {
             errors.put("paymentMethod", "Value is required");
         } else {
             order.setPaymentMethod(PaymentMethod.valueOf(value));
+        }
+    }
+
+    private void setDeliveryDate(HttpServletRequest request, Map<String, String> errors, Order order) {
+        var value = request.getParameter("deliveryDate");
+        if (value.isEmpty()) {
+            errors.put("deliveryDate", "Value is required");
+        } else if (LocalDate.now().isAfter(LocalDate.parse(value))) {
+            errors.put("deliveryDate", "Date can not be in the past");
+        } else {
+            order.setDeliveryDate(LocalDate.parse(value));
         }
     }
 }
