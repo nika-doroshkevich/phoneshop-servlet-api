@@ -91,9 +91,13 @@ public class ProductDetailsPageServletTest {
         when(request.getParameter("quantity")).thenReturn("1");
         Product product = new Product();
         product.setStock(100);
+        product.setPrice(new BigDecimal(1000));
         when(productDao.getEntity(any())).thenReturn(product);
+
         servlet.doPost(request, response);
+
         verify(response).sendRedirect(anyString());
+        verify(productDao).getEntity(any());
     }
 
     @Test

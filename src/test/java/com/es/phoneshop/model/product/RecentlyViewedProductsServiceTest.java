@@ -22,7 +22,7 @@ public class RecentlyViewedProductsServiceTest {
     private HttpSession httpSession;
 
     @Test
-    public void addProductToRecentlyViewedProductsFromSessionNull() {
+    public void testAddProductToRecentlyViewedProductsFromSessionNull() {
         RecentlyViewedProductsService recentlyViewedProductsService = new RecentlyViewedProductsService();
         Product product = new Product();
         when(httpServletRequest.getSession()).thenReturn(httpSession);
@@ -33,7 +33,7 @@ public class RecentlyViewedProductsServiceTest {
     }
 
     @Test
-    public void addProductToRecentlyViewedProductsFromSessionNotNull() {
+    public void testAddProductToRecentlyViewedProductsFromSessionNotNull() {
         RecentlyViewedProductsService recentlyViewedProductsService = new RecentlyViewedProductsService();
         Product product = new Product();
         var products = new LinkedList<>();
