@@ -49,7 +49,7 @@ public class CheckoutPageServlet extends HttpServlet {
 
         setRequiredParameter(request, "firstName", errors, order::setFirstName);
         setRequiredParameter(request, "lastName", errors, order::setLastName);
-        setRequiredParameter(request, "phone", errors, order::setPhone);
+        setPhone(request, errors, order);
         setRequiredParameter(request, "deliveryAddress", errors, order::setDeliveryAddress);
         setDeliveryDate(request, errors, order);
         setPaymentMethod(request, errors, order);
@@ -78,6 +78,17 @@ public class CheckoutPageServlet extends HttpServlet {
             errors.put(parameter, "Value is required");
         } else {
             consumer.accept(value);
+        }
+    }
+
+    private void setPhone(HttpServletRequest request, Map<String, String> errors, Order order) {
+        var value = request.getParameter("phone");
+        if (value == null || value.isEmpty()) {
+            errors.put("phone", "Value is required");
+        } else if (!value.matches("^\\d+$")) {
+            errors.put("phone", "Phone number can only consist of digits");
+        } else {
+            order.setPhone(value);
         }
     }
 

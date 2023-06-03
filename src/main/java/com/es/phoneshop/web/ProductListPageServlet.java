@@ -7,6 +7,7 @@ import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.model.product.RecentlyViewedProductsService;
+import com.es.phoneshop.model.product.RecentlyViewedProductsServiceImpl;
 import com.es.phoneshop.model.product.SortField;
 import com.es.phoneshop.model.product.SortOrder;
 import jakarta.servlet.ServletConfig;
@@ -28,12 +29,14 @@ public class ProductListPageServlet extends HttpServlet {
 
     private ProductDao productDao;
     private CartService cartService;
+    private RecentlyViewedProductsService recentlyViewedProductsService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         productDao = ArrayListProductDao.getInstance();
         cartService = DefaultCartService.getInstance();
+        recentlyViewedProductsService = RecentlyViewedProductsServiceImpl.getInstance();
     }
 
     @Override
@@ -49,7 +52,7 @@ public class ProductListPageServlet extends HttpServlet {
 
         request.setAttribute("products", products);
 
-        var list = new RecentlyViewedProductsService().getRecentlyViewedProducts(request);
+        var list = recentlyViewedProductsService.getRecentlyViewedProducts(request);
         List<Product> recentlyViewedProducts = new ArrayList<>(list);
         request.setAttribute("recentlyViewedProducts", recentlyViewedProducts);
         request.getRequestDispatcher("/WEB-INF/pages/productList.jsp").forward(request, response);
@@ -61,8 +64,11 @@ public class ProductListPageServlet extends HttpServlet {
         var quantityRequest = request.getParameter("quantity");
 
         Map<Long, String> errors = new HashMap<>();
-
         Long productId = Long.valueOf(productIdRequest);
+        if (validate(request, response, errors, productId, quantityRequest)) {
+            return;
+        }
+
         int quantity;
         try {
             quantity = getQuantity(request, quantityRequest);
@@ -77,6 +83,20 @@ public class ProductListPageServlet extends HttpServlet {
             request.setAttribute("errors", errors);
             doGet(request, response);
         }
+    }
+
+    private boolean validate(HttpServletRequest request, HttpServletResponse response, Map<Long, String> errors,
+                             Long productId, String quantityRequest) throws ServletException, IOException {
+        if (!(quantityRequest.matches("^[1-9]\\d{0,2}(,\\d{3})*$")
+                || quantityRequest.matches("^[1-9]\\d{0,2}(\\.\\d{3})*$")
+                || quantityRequest.matches("^\\d+$"))) {
+
+            errors.put(productId, "Quantity should be a positive integer number");
+            request.setAttribute("errors", errors);
+            doGet(request, response);
+            return true;
+        }
+        return false;
     }
 
     private void handleError(Map<Long, String> errors, Long productId, Exception e) {

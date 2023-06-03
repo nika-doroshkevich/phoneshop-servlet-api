@@ -42,6 +42,9 @@ public class CartPageServlet extends HttpServlet {
 
         for (int i = 0; i < productIds.length; i++) {
             Long productId = Long.valueOf(productIds[i]);
+            if (validate(request, response, errors, productId, quantities[i])) {
+                return;
+            }
 
             int quantity;
             try {
@@ -58,6 +61,20 @@ public class CartPageServlet extends HttpServlet {
             request.setAttribute("errors", errors);
             doGet(request, response);
         }
+    }
+
+    private boolean validate(HttpServletRequest request, HttpServletResponse response, Map<Long, String> errors,
+                             Long productId, String quantityRequest) throws ServletException, IOException {
+        if (!(quantityRequest.matches("^[1-9]\\d{0,2}(,\\d{3})*$")
+                || quantityRequest.matches("^[1-9]\\d{0,2}(\\.\\d{3})*$")
+                || quantityRequest.matches("^\\d+$"))) {
+
+            errors.put(productId, "Quantity should be a positive integer number");
+            request.setAttribute("errors", errors);
+            doGet(request, response);
+            return true;
+        }
+        return false;
     }
 
     private void handleError(Map<Long, String> errors, Long productId, Exception e) {

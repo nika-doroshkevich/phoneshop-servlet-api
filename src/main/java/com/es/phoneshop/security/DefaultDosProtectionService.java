@@ -45,10 +45,10 @@ public class DefaultDosProtectionService implements DosProtectionService {
         countMap.entrySet().stream()
                 .filter(ip -> ip.getValue() > 20)
                 .map(Map.Entry::getKey)
-                .peek(ip -> ipsBlackList.add(ip));
+                .forEach(ip -> ipsBlackList.add(ip));
 
         countMap.entrySet().stream()
                 .filter(ip -> ip.getValue() <= 20)
-                .peek(ip -> ip.setValue(0L));
+                .forEach(ip -> ip.setValue(0L));
     }
 }

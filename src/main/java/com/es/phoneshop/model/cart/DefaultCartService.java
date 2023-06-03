@@ -39,9 +39,7 @@ public class DefaultCartService implements CartService {
     @Override
     public synchronized void add(Cart cart, Long productId, int quantity) throws OutOfStockException {
         Product product = productDao.getEntity(productId);
-        if (product.getStock() < quantity) {
-            throw new OutOfStockException(product, quantity, product.getStock());
-        }
+        checkQuantityOnOutOfStock(product, quantity);
 
         var itemOptional = cart.getItems().stream()
                 .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
@@ -51,9 +49,7 @@ public class DefaultCartService implements CartService {
             var item = itemOptional.get();
             int previousQuantity = item.getQuantity();
             var newQuantity = previousQuantity + quantity;
-            if (product.getStock() < newQuantity) {
-                throw new OutOfStockException(product, quantity, product.getStock());
-            }
+            checkQuantityOnOutOfStock(product, newQuantity);
             item.setQuantity(previousQuantity + quantity);
         } else {
             cart.getItems().add(new CartItem(product, quantity));
@@ -64,9 +60,7 @@ public class DefaultCartService implements CartService {
     @Override
     public synchronized void update(Cart cart, Long productId, int quantity) throws OutOfStockException {
         Product product = productDao.getEntity(productId);
-        if (product.getStock() < quantity) {
-            throw new OutOfStockException(product, quantity, product.getStock());
-        }
+        checkQuantityOnOutOfStock(product, quantity);
 
         var item = cart.getItems().stream()
                 .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
@@ -91,6 +85,12 @@ public class DefaultCartService implements CartService {
         cart.setTotalQuantity(0);
         cart.setTotalCost(null);
         cart.setCurrency(null);
+    }
+
+    private void checkQuantityOnOutOfStock(Product product, int quantity) throws OutOfStockException {
+        if (product.getStock() < quantity) {
+            throw new OutOfStockException(product, quantity, product.getStock());
+        }
     }
 
     private void recalculateCart(Cart cart) {

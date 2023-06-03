@@ -8,6 +8,7 @@ import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.model.product.RecentlyViewedProductsService;
+import com.es.phoneshop.model.product.RecentlyViewedProductsServiceImpl;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -28,12 +29,14 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     private ProductDao productDao;
     private CartService cartService;
+    private RecentlyViewedProductsService recentlyViewedProductsService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         productDao = ArrayListProductDao.getInstance();
         cartService = DefaultCartService.getInstance();
+        recentlyViewedProductsService = RecentlyViewedProductsServiceImpl.getInstance();
     }
 
     @Override
@@ -61,7 +64,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             requestPage = "product.jsp";
             Cart cartFromSession = cartService.getCart(request);
             request.setAttribute("cart", cartFromSession);
-            new RecentlyViewedProductsService().addProductToRecentlyViewed(request, product);
+            recentlyViewedProductsService.addProductToRecentlyViewed(request, product);
         }
         dispatchRequest(request, response, requestPage, attributes);
     }
@@ -94,6 +97,10 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (validate(request, response)) {
+            return;
+        }
+
         var productIdFromPath = request.getPathInfo().substring(1);
         var productId = Long.valueOf(productIdFromPath);
         var locale = request.getLocale();
@@ -111,12 +118,33 @@ public class ProductDetailsPageServlet extends HttpServlet {
         } catch (OutOfStockException e) {
             errorMessage = "Out of stock, available " + e.getStockAvailable();
         }
+        if (validate(request, response, errorMessage)) {
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath()
+                + "/products/" + productId + "?message=Product added to cart");
+    }
+
+    private boolean validate(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        var quantityString = request.getParameter("quantity");
+        if (!(quantityString.matches("^[1-9]\\d{0,2}(,\\d{3})*$")
+                || quantityString.matches("^[1-9]\\d{0,2}(\\.\\d{3})*$")
+                || quantityString.matches("^\\d+$"))) {
+
+            request.setAttribute("error", "Quantity should be a positive integer number");
+            doGet(request, response);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean validate(HttpServletRequest request, HttpServletResponse response, String errorMessage) throws ServletException, IOException {
         if (errorMessage != null) {
             request.setAttribute("error", errorMessage);
             doGet(request, response);
-            return;
+            return true;
         }
-        response.sendRedirect(request.getContextPath()
-                + "/products/" + productId + "?message=Product added to cart");
+        return false;
     }
 }
