@@ -6,6 +6,10 @@ import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.math.BigDecimal;
+import java.util.Currency;
+import java.util.NoSuchElementException;
+
 public class DefaultCartService implements CartService {
 
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + ".cart";
@@ -54,5 +58,50 @@ public class DefaultCartService implements CartService {
         } else {
             cart.getItems().add(new CartItem(product, quantity));
         }
+        recalculateCart(cart);
+    }
+
+    @Override
+    public synchronized void update(Cart cart, Long productId, int quantity) throws OutOfStockException {
+        Product product = productDao.getProduct(productId);
+        if (product.getStock() < quantity) {
+            throw new OutOfStockException(product, quantity, product.getStock());
+        }
+
+        var item = cart.getItems().stream()
+                .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Item doesn't exist."));
+
+        item.setQuantity(quantity);
+        recalculateCart(cart);
+    }
+
+    @Override
+    public synchronized void delete(Cart cart, Long productId) {
+        cart.getItems().removeIf(item ->
+                productId.equals(item.getProduct().getId())
+        );
+        recalculateCart(cart);
+    }
+
+    private void recalculateCart(Cart cart) {
+        cart.setTotalQuantity(cart.getItems().stream()
+                .map(CartItem::getQuantity)
+                .mapToInt(q -> q)
+                .sum()
+        );
+
+        BigDecimal totalCostValue = cart.getItems().stream()
+                .map(item -> {
+                    var price = item.getProduct().getPrice();
+                    var quantity = item.getQuantity();
+                    return price.multiply(BigDecimal.valueOf(quantity));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        var usd = Currency.getInstance("USD");
+        var totalCost = cart.new TotalCost(totalCostValue, usd);
+        cart.setTotalCost(totalCost);
     }
 }

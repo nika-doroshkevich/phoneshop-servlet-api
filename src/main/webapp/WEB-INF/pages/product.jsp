@@ -6,6 +6,9 @@
 <jsp:useBean id="product" type="com.es.phoneshop.model.product.Product" scope="request"/>
 <tags:master pageTitle="Product Details">
     <a href="${pageContext.servletContext.contextPath}/products">Back to main page</a>
+    <p>
+        <a href="${pageContext.servletContext.contextPath}/cart">Cart</a>
+    </p>
 
     <p>
         Cart: ${cart}
