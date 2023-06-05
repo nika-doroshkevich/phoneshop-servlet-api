@@ -29,8 +29,20 @@ td {
     text-align: right;
 }
 
+.quantity {
+    text-align: right;
+}
+
 img.product-tile {
     max-width: 64px;
+}
+
+.error {
+    color: red;
+}
+
+.success {
+    color: green;
 }
 
 /* Page specific styles */

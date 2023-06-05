@@ -1,8 +1,13 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.exception.BadRequestException;
+import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
+import com.es.phoneshop.model.cart.CartService;
+import com.es.phoneshop.model.cart.DefaultCartService;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.model.product.RecentlyViewedProductsService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -10,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,11 +27,13 @@ public class ProductDetailsPageServlet extends HttpServlet {
     private static final String PRICES = "prices";
 
     private ProductDao productDao;
+    private CartService cartService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         productDao = ArrayListProductDao.getInstance();
+        cartService = DefaultCartService.getInstance();
     }
 
     @Override
@@ -32,6 +41,12 @@ public class ProductDetailsPageServlet extends HttpServlet {
         var path = request.getPathInfo();
         validatePath(path);
         var productId = retrieveProductId(path);
+
+        String error = (String) request.getAttribute("error");
+        String message = request.getParameter("message");
+        if (message != null && (error == null || error.isEmpty())) {
+            request.setAttribute("message", message);
+        }
 
         String requestPage;
         Map<String, Object> attributes = new HashMap<>();
@@ -44,6 +59,9 @@ public class ProductDetailsPageServlet extends HttpServlet {
             var product = productDao.getProduct(productId);
             attributes.put("product", product);
             requestPage = "product.jsp";
+            Cart cartFromSession = cartService.getCart(request);
+            request.setAttribute("cart", cartFromSession);
+            new RecentlyViewedProductsService().addProductToRecentlyViewed(request, product);
         }
         dispatchRequest(request, response, requestPage, attributes);
     }
@@ -72,5 +90,33 @@ public class ProductDetailsPageServlet extends HttpServlet {
         if (wrongPath) {
             throw new BadRequestException("Incorrect request path for servlet with name 'product'");
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        var productIdFromPath = request.getPathInfo().substring(1);
+        var productId = Long.valueOf(productIdFromPath);
+        var locale = request.getLocale();
+        var quantityString = request.getParameter("quantity");
+        int quantity;
+        var cart = cartService.getCart(request);
+        String errorMessage = null;
+
+        try {
+            var format = NumberFormat.getInstance(locale);
+            quantity = format.parse(quantityString).intValue();
+            cartService.add(cart, productId, quantity);
+        } catch (ParseException ex) {
+            errorMessage = "Quantity of products should be a number";
+        } catch (OutOfStockException e) {
+            errorMessage = "Out of stock, available " + e.getStockAvailable();
+        }
+        if (errorMessage != null) {
+            request.setAttribute("error", errorMessage);
+            doGet(request, response);
+            return;
+        }
+        response.sendRedirect(request.getContextPath()
+                + "/products/" + productId + "?message=Product added to cart");
     }
 }

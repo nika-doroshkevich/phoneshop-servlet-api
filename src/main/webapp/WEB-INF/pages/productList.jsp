@@ -40,10 +40,13 @@
                 </td>
                 <td class="price">
                     <a href="${pageContext.servletContext.contextPath}/products/prices/${product.id}" target="_blank">
-                        <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
+                        <fmt:formatNumber value="${product.price}" type="currency"
+                                          currencySymbol="${product.currency.symbol}"/>
                     </a>
                 </td>
             </tr>
         </c:forEach>
     </table>
+
+    <tags:recentlyViewedProducts recentlyViewedProducts="${recentlyViewedProducts}"/>
 </tags:master>
