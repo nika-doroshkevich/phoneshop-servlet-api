@@ -9,6 +9,7 @@ import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.model.product.RecentlyViewedProductsService;
 import com.es.phoneshop.model.product.RecentlyViewedProductsServiceImpl;
+import com.es.phoneshop.utils.ParseRequestUtil;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,54 +97,29 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (validate(request, response)) {
-            return;
-        }
-
         var productIdFromPath = request.getPathInfo().substring(1);
         var productId = Long.valueOf(productIdFromPath);
-        var locale = request.getLocale();
         var quantityString = request.getParameter("quantity");
         int quantity;
         var cart = cartService.getCart(request);
         String errorMessage = null;
 
         try {
-            var format = NumberFormat.getInstance(locale);
-            quantity = format.parse(quantityString).intValue();
+            quantity = ParseRequestUtil.getQuantity(request, quantityString);
             cartService.add(cart, productId, quantity);
         } catch (ParseException ex) {
-            errorMessage = "Quantity of products should be a number";
+            errorMessage = "Quantity should be a positive integer number";
         } catch (OutOfStockException e) {
             errorMessage = "Out of stock, available " + e.getStockAvailable();
         }
-        if (validate(request, response, errorMessage)) {
+
+        if (errorMessage != null) {
+            request.setAttribute("error", errorMessage);
+            doGet(request, response);
             return;
         }
 
         response.sendRedirect(request.getContextPath()
                 + "/products/" + productId + "?message=Product added to cart");
-    }
-
-    private boolean validate(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        var quantityString = request.getParameter("quantity");
-        if (!(quantityString.matches("^[1-9]\\d{0,2}(,\\d{3})*$")
-                || quantityString.matches("^[1-9]\\d{0,2}(\\.\\d{3})*$")
-                || quantityString.matches("^\\d+$"))) {
-
-            request.setAttribute("error", "Quantity should be a positive integer number");
-            doGet(request, response);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean validate(HttpServletRequest request, HttpServletResponse response, String errorMessage) throws ServletException, IOException {
-        if (errorMessage != null) {
-            request.setAttribute("error", errorMessage);
-            doGet(request, response);
-            return true;
-        }
-        return false;
     }
 }
