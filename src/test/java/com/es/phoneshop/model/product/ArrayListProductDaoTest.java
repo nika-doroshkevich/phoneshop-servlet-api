@@ -46,12 +46,12 @@ public class ArrayListProductDaoTest {
 
     @Test(expected = BadRequestException.class)
     public void testGetProductIdNull() {
-        productDao.getProduct(null);
+        productDao.getEntity(null);
     }
 
     @Test
     public void testGetProductSuccessfully() {
-        var product = productDao.getProduct(1L);
+        var product = productDao.getEntity(1L);
         Long expectedId = 1L;
         assertNotNull(product);
         assertEquals(expectedId, product.getId());
@@ -59,7 +59,7 @@ public class ArrayListProductDaoTest {
 
     @Test(expected = NoSuchElementException.class)
     public void testGetProductNotInList() {
-        productDao.getProduct(-1L);
+        productDao.getEntity(-1L);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class ArrayListProductDaoTest {
         product.setId(1L);
         Long expectedId = 1L;
         productDao.save(product);
-        var expectedProduct = productDao.getProduct(1L);
+        var expectedProduct = productDao.getEntity(1L);
         assertEquals(expectedId, expectedProduct.getId());
         assertEquals("test", expectedProduct.getCode());
     }

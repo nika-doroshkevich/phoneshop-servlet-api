@@ -21,6 +21,10 @@ public class ExceptionHandler extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/pages/errors/errorNoSuchElement.jsp").forward(request, response);
         } else if (statusCode == 500) {
             request.getRequestDispatcher("/WEB-INF/pages/errors/error-500.jsp").forward(request, response);
+        } else if (statusCode == 404) {
+            request.getRequestDispatcher("/WEB-INF/pages/errors/error-404.jsp").forward(request, response);
+        } else {
+            request.getRequestDispatcher("/WEB-INF/pages/errors/error-default.jsp").forward(request, response);
         }
     }
 }

@@ -22,8 +22,8 @@ public class RecentlyViewedProductsServiceTest {
     private HttpSession httpSession;
 
     @Test
-    public void addProductToRecentlyViewedProductsFromSessionNull() {
-        RecentlyViewedProductsService recentlyViewedProductsService = new RecentlyViewedProductsService();
+    public void testAddProductToRecentlyViewedProductsFromSessionNull() {
+        RecentlyViewedProductsServiceImpl recentlyViewedProductsService = new RecentlyViewedProductsServiceImpl();
         Product product = new Product();
         when(httpServletRequest.getSession()).thenReturn(httpSession);
         recentlyViewedProductsService.addProductToRecentlyViewed(httpServletRequest, product);
@@ -33,8 +33,8 @@ public class RecentlyViewedProductsServiceTest {
     }
 
     @Test
-    public void addProductToRecentlyViewedProductsFromSessionNotNull() {
-        RecentlyViewedProductsService recentlyViewedProductsService = new RecentlyViewedProductsService();
+    public void testAddProductToRecentlyViewedProductsFromSessionNotNull() {
+        RecentlyViewedProductsServiceImpl recentlyViewedProductsService = new RecentlyViewedProductsServiceImpl();
         Product product = new Product();
         var products = new LinkedList<>();
         products.addFirst(product);

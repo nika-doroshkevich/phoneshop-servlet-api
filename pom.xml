@@ -71,7 +71,7 @@
     </dependencies>
 
     <build>
-        <finalName>phoneshop-servlet-api</finalName>
+        <finalName>ROOT</finalName>
 
         <plugins>
             <plugin>

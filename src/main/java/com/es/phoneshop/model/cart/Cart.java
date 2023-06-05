@@ -1,6 +1,5 @@
 package com.es.phoneshop.model.cart;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +16,8 @@ public class Cart implements Serializable {
     private List<CartItem> items;
 
     private int totalQuantity;
-    private TotalCost totalCost;
+    private BigDecimal totalCost;
+    private Currency currency;
 
     public Cart() {
         this.items = new ArrayList<>();
@@ -28,13 +28,5 @@ public class Cart implements Serializable {
         return "Cart{" +
                 "items=" + items +
                 '}';
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public class TotalCost {
-        BigDecimal totalCost;
-        Currency currency;
     }
 }

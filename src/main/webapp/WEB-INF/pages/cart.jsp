@@ -88,13 +88,18 @@
                 <td></td>
                 <td class="price">Total cost</td>
                 <td class="price">
-                    <fmt:formatNumber value="${cart.totalCost.totalCost}" type="currency"
-                                      currencySymbol="${cart.totalCost.currency.symbol}"/>
+                    <fmt:formatNumber value="${cart.totalCost}" type="currency"
+                                      currencySymbol="${cart.currency.symbol}"/>
                 </td>
             </tr>
         </table>
         <p>
             <button>Update</button>
+        </p>
+    </form>
+    <form action="${pageContext.servletContext.contextPath}/checkout">
+        <p>
+            <button>Checkout</button>
         </p>
     </form>
     <form id="deleteCartItem" method="post">

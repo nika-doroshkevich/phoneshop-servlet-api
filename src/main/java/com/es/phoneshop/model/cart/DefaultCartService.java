@@ -38,10 +38,8 @@ public class DefaultCartService implements CartService {
 
     @Override
     public synchronized void add(Cart cart, Long productId, int quantity) throws OutOfStockException {
-        Product product = productDao.getProduct(productId);
-        if (product.getStock() < quantity) {
-            throw new OutOfStockException(product, quantity, product.getStock());
-        }
+        Product product = productDao.getEntity(productId);
+        checkQuantityOnOutOfStock(product, quantity);
 
         var itemOptional = cart.getItems().stream()
                 .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
@@ -51,9 +49,7 @@ public class DefaultCartService implements CartService {
             var item = itemOptional.get();
             int previousQuantity = item.getQuantity();
             var newQuantity = previousQuantity + quantity;
-            if (product.getStock() < newQuantity) {
-                throw new OutOfStockException(product, quantity, product.getStock());
-            }
+            checkQuantityOnOutOfStock(product, newQuantity);
             item.setQuantity(previousQuantity + quantity);
         } else {
             cart.getItems().add(new CartItem(product, quantity));
@@ -63,10 +59,8 @@ public class DefaultCartService implements CartService {
 
     @Override
     public synchronized void update(Cart cart, Long productId, int quantity) throws OutOfStockException {
-        Product product = productDao.getProduct(productId);
-        if (product.getStock() < quantity) {
-            throw new OutOfStockException(product, quantity, product.getStock());
-        }
+        Product product = productDao.getEntity(productId);
+        checkQuantityOnOutOfStock(product, quantity);
 
         var item = cart.getItems().stream()
                 .filter(cartItem -> productId.equals(cartItem.getProduct().getId()))
@@ -85,6 +79,20 @@ public class DefaultCartService implements CartService {
         recalculateCart(cart);
     }
 
+    @Override
+    public void cleanCart(Cart cart) {
+        cart.getItems().clear();
+        cart.setTotalQuantity(0);
+        cart.setTotalCost(null);
+        cart.setCurrency(null);
+    }
+
+    private void checkQuantityOnOutOfStock(Product product, int quantity) throws OutOfStockException {
+        if (product.getStock() < quantity) {
+            throw new OutOfStockException(product, quantity, product.getStock());
+        }
+    }
+
     private void recalculateCart(Cart cart) {
         cart.setTotalQuantity(cart.getItems().stream()
                 .map(CartItem::getQuantity)
@@ -92,7 +100,7 @@ public class DefaultCartService implements CartService {
                 .sum()
         );
 
-        BigDecimal totalCostValue = cart.getItems().stream()
+        BigDecimal totalCost = cart.getItems().stream()
                 .map(item -> {
                     var price = item.getProduct().getPrice();
                     var quantity = item.getQuantity();
@@ -100,8 +108,8 @@ public class DefaultCartService implements CartService {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        var usd = Currency.getInstance("USD");
-        var totalCost = cart.new TotalCost(totalCostValue, usd);
         cart.setTotalCost(totalCost);
+        var usd = Currency.getInstance("USD");
+        cart.setCurrency(usd);
     }
 }

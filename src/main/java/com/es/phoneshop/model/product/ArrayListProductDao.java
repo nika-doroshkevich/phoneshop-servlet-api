@@ -42,7 +42,7 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public Product getProduct(Long id) throws NoSuchElementException {
+    public Product getEntity(Long id) throws NoSuchElementException {
         if (id == null) {
             throw new BadRequestException("Product id can not be null.");
         }

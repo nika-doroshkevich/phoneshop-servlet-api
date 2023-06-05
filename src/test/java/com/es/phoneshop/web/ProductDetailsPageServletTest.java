@@ -76,7 +76,7 @@ public class ProductDetailsPageServletTest {
         when(request.getSession()).thenReturn(httpSession);
         Currency usd = Currency.getInstance("USD");
         var product = new Product("test", "Test", new BigDecimal(100), usd, 100, "test");
-        when(productDao.getProduct(1L)).thenReturn(product);
+        when(productDao.getEntity(1L)).thenReturn(product);
         servlet.doGet(request, response);
         verify(requestDispatcher).forward(request, response);
         verify(request).setAttribute(eq("product"), any());
@@ -91,9 +91,13 @@ public class ProductDetailsPageServletTest {
         when(request.getParameter("quantity")).thenReturn("1");
         Product product = new Product();
         product.setStock(100);
-        when(productDao.getProduct(any())).thenReturn(product);
+        product.setPrice(new BigDecimal(1000));
+        when(productDao.getEntity(any())).thenReturn(product);
+
         servlet.doPost(request, response);
+
         verify(response).sendRedirect(anyString());
+        verify(productDao).getEntity(any());
     }
 
     @Test

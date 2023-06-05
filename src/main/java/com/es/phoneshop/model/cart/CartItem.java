@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CartItem implements Serializable {
+public class CartItem implements Serializable, Cloneable {
 
     private Product product;
     private int quantity;
@@ -18,5 +18,10 @@ public class CartItem implements Serializable {
     @Override
     public String toString() {
         return product.getCode() + ", " + quantity;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
