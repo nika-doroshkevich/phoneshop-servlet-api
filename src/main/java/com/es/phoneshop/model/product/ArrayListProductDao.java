@@ -4,6 +4,7 @@ import com.es.phoneshop.exception.BadRequestException;
 import com.es.phoneshop.model.product.price.ProductPrice;
 import com.es.phoneshop.model.product.price.ProductPricesDto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+import static com.es.phoneshop.model.product.SearchOption.ALL_WORDS;
 import static com.es.phoneshop.model.product.SortField.description;
 import static com.es.phoneshop.model.product.SortField.price;
 import static com.es.phoneshop.model.product.SortOrder.desc;
@@ -120,6 +122,48 @@ public class ArrayListProductDao implements ProductDao {
         } finally {
             readLock.unlock();
         }
+    }
+
+    @Override
+    public List<Product> findProducts(String description, String searchOption, BigDecimal minPrice, BigDecimal maxPrice) {
+        List<Product> productsList = new ArrayList<>();
+
+        if (description != null && !description.trim().isEmpty()) {
+            if (searchOption.equals(ALL_WORDS.name())) {
+                productsList = products.stream()
+                        .filter(p -> p.getDescription().equals(description))
+                        .collect(Collectors.toList());
+            } else {
+                String queryToLower = description.toLowerCase();
+                String[] queryWords = queryToLower.split("\\s+");
+
+                productsList = products.stream()
+                        .map(ProductDto::new)
+                        .peek(productDto -> countMatches(productDto, queryWords, queryToLower))
+                        .filter(productDto -> productDto.getNumberOfMatches() > 0)
+                        .sorted(Comparator.comparing(ProductDto::getNumberOfMatches).reversed())
+                        .map(ProductDto::getProduct)
+                        .filter(Product::isAvailableForSale)
+                        .collect(Collectors.toList());
+            }
+        } else {
+            productsList = products;
+        }
+
+        if (minPrice != null) {
+            productsList = productsList.stream()
+                    .filter(p -> p.getPrice().compareTo(minPrice) >= 0)
+                    .collect(Collectors.toList());
+        }
+
+        if (maxPrice != null) {
+            productsList = productsList.stream()
+                    .filter(p -> p.getPrice().compareTo(maxPrice) <= 0)
+                    .collect(Collectors.toList());
+        }
+
+
+        return productsList;
     }
 
     @Override

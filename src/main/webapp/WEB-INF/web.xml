@@ -86,6 +86,15 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <servlet>
+        <servlet-name>advanced-search</servlet-name>
+        <servlet-class>com.es.phoneshop.web.AdvancedSearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>advanced-search</servlet-name>
+        <url-pattern>/advanced-search</url-pattern>
+    </servlet-mapping>
+
     <!--Errors-->
 
     <servlet>
