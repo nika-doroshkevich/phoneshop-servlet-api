@@ -1,4 +1,4 @@
-# Project for Online course servlet-api + ecommerce from ExpertSoft
+# Project for Java Web course from ExpertSoft
 
 ### Stack of technologies :computer:
 
